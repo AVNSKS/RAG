@@ -42,4 +42,9 @@ export const getDatabaseStats = async () => {
   return response.data;
 };
 
+export const deleteFile = async (filename) => {
+  const response = await api.delete(`/files/${encodeURIComponent(filename)}`);
+  return response.data;
+};
+
 export default api;

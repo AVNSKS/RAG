@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Send, Menu, X, Upload, FileText, Cpu, Terminal, Maximize2, Circle, Trash2, Palette } from 'lucide-react';
-import { askQuestion, uploadFile, getFiles } from '../services/api';
+import { askQuestion, uploadFile, getFiles, deleteFile } from '../services/api';
 
 export default function NeuralRAGChat() {
   const [sidebarOpen, setSidebarOpen] = useState(true);
@@ -115,9 +115,15 @@ export default function NeuralRAGChat() {
     handleFileUpload(e.dataTransfer.files);
   };
 
-  const removeFile = (id) => {
-    // Note: This only removes from UI, not from backend
-    setUploadedFiles(uploadedFiles.filter(file => file.id !== id));
+  const removeFile = async (filename) => {
+    try {
+      await deleteFile(filename);
+      // Reload files from server after deletion
+      await loadFiles();
+    } catch (error) {
+      console.error('Error deleting file:', error);
+      alert(`Failed to delete ${filename}: ${error.response?.data?.error || error.message}`);
+    }
   };
 
   const formatFileSize = (bytes) => {
@@ -220,7 +226,7 @@ export default function NeuralRAGChat() {
               <button
                 onClick={(e) => {
                   e.stopPropagation();
-                  removeFile(file.id);
+                  removeFile(file.name);
                 }}
                 className="opacity-0 group-hover:opacity-100 p-1 hover:bg-red-500/20 rounded transition-all"
               >

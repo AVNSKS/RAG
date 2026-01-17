@@ -196,6 +196,34 @@ def list_files():
         }), 500
 
 
+@app.route('/files/<filename>', methods=['DELETE'])
+def delete_file(filename):
+    """
+    Delete a specific uploaded PDF file
+    
+    Usage:
+    curl -X DELETE http://localhost:5001/files/document.pdf
+    """
+    try:
+        if not allowed_file(filename):
+            return jsonify({"error": "Invalid file type"}), 400
+        
+        filepath = os.path.join(UPLOAD_FOLDER, secure_filename(filename))
+        
+        if not os.path.exists(filepath):
+            return jsonify({"error": "File not found"}), 404
+        
+        os.remove(filepath)
+        
+        return jsonify({
+            "status": "success",
+            "message": f"File {filename} deleted successfully"
+        }), 200
+    
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+
 @app.route('/database/clear', methods=['POST'])
 def clear_db():
     """
